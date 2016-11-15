@@ -167,7 +167,7 @@ def Sessionlogin(url):
 
 # ---------------------------MAIN PROGRAMME--------------------------------
 if __name__ == '__main__':
-    Login(url, username='498651225@qq.com', password='wodingni1937')
+    Login(url, username='', password='')
 
     home_url = 'http://www.51cto.com/'
     resp = session.get(home_url, headers=headers, allow_redirects=False)
