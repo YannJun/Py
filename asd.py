@@ -2,89 +2,173 @@
 # -*- coding: utf-8 -*-
 import urllib
 import urllib2
+import re
 import cookielib
 import json
 import requests
 
+# LoginForm[password]	wodingni1937
+# LoginForm[rememberMe]	 0
+# LoginForm[username]	 498651225@qq.com
+# _csrf	 dy5LRC1hV28.ZwUQQlRgQiFtMndqUyJaPlo/E0M7FR5FfAwbSRgwAA==
+# login-button	 登 录
 
-def SaveCookies(url):
-    # 设置保存cookie的文件，同级目录下的cookie.txt
-    filename = 'cookie.txt'
-    # 声明一个MozillaCookieJar对象实例来保存cookie，之后写入文件
-    cookie = cookielib.MozillaCookieJar(filename)
-    # 利用urllib2库的HTTPCookieProcessor对象来创建cookie处理器
-    cookie_handler = urllib2.HTTPCookieProcessor(cookie)
-    # 通过handler来构建opener
-    cookie_opener = urllib2.build_opener(handler)
-    # 创建一个请求，原理同urllib2的urlopen
-    response = opener.open(url)
-    # 保存cookie到文件
-    cookie.save(ignore_discard=True, ignore_expires=True)
+# url of the site to log in
+url = "http://home.51cto.com/index?reback=http://www.51cto.com/"
+# file to stock the cookies
+filename = 'cookie'
+# headers setting
+headers = {
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    # "Accept-Encoding": "gzip, deflate, sdch, br",
+    "Accept-Language": "en-US,en;q=0.8",
+    "Connection": "keep-Alive",
+    # "Host": "",
+    "Referer": url,
+    # "Upgrade-Insecure-Requests": 1,
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.101 Safari/537.36",
+    "Content-Type": "application/x-www-form-urlencoded"
+    # "Content-Type": "text/html"
+}
+
+# 建立一个会话，可以把同一用户的不同请求联系起来；直到会话结束都会自动处理cookies
+session = requests.Session()
+# 建立LWPCookieJar实例，可以存Set-Cookie3类型的文件。
+# 而MozillaCookieJar类是存为'/.txt'格式的文件
+session.cookies = cookielib.LWPCookieJar(filename)
+# 若本地有cookie则不用再post数据了
+try:
+    session.cookies.load(filename=filename, ignore_discard=True)
+except:
+    print('Cookie未加载！')
 
 
-def OpenNullProxy():
-    # (null) proxy handler
-    null_proxy_handler = urllib2.ProxyHandler({})
-    proxy_opener = urllib2.build_opener(null_proxy_handler)
-    urllib2.install_opener(proxy_opener)
+def Getcsrf():
+    """
+    获取参数_csrf
+    """
+    response = session.get(
+        'http://home.51cto.com/index?reback=http://www.51cto.com/', headers=headers)
+    html = response.text
+    get_csrf_pattern = re.compile(
+        r'<meta name="csrf-token" content="(.*?)"')
+    # <meta name="csrf-token" content="Lk1YZkJVUzdPJCgcGCALbV4APzQkJh1uayMeIjMUBkZiJhEFKi8mUg==">
+    _csrf = re.findall(get_csrf_pattern, html)[0]
+    return _csrf
 
 
-def GetResponseFromSite(url):
+def Login(url, username, password):
+    """
+    输入自己的账号密码，模拟登录51cto
+    """
+    print '登录中...'
+    data = {
+        "LoginForm[password]": password,
+        "LoginForm[rememberMe]": 0,
+        "LoginForm[username]": username,
+        '_csrf': Getcsrf(),
+        "login-button": "登 录",
+    }
+    # 若不用验证码，直接登录
+    try:
+        result = session.post(url, data=data, headers=headers)
+        print (json.loads(result.text))['msg']
+    # 要用验证码，post后登录
+    except:
+        print 'something is wrong'
+        print result.text.encode('utf-8')  # .decode('utf-8')
+        print dir(result.text)
+        print dir(result)
+        # print result.decode('utf-8')
+        # print (json.loads(result.text))['msg']
+    # 保存cookie到本地
+    session.cookies.save(ignore_discard=True, ignore_expires=True)
+
+
+def ReqPOST(url):
     # credential to send to log in?
     # request_credential = {"AUTHENTICATION.LOGIN": "", "AUTHENTICATION.PASSWORD": ""}
-    #request_GET = urllib2.Request(url)
-    # client = requests.session()
-    # response_GET = urllib.urlopen(url)
-
     value_credential = {
-        "LoginForm[username]": "@qq.com",
-        "LoginForm[password]": "",
-        "LoginForm[rememberMe]": 0,
+        "LoginForm[password]": ".",
+        "LoginForm[rememberMe]": "",
+        "LoginForm[username]": "?",
         "login-button": "登 录"
     }
+    # encode the data
     data_credential = urllib.urlencode(value_credential)
 
     # data for debug (test data)
-    value_debug = {"username": "qsd.yang", "password": "############"}
-    data_debug = urllib.urlencode(value_debug)
+    # value_debug = {"username": "qsd.yang", "password": "############"}
+    # data_debug = urllib.urlencode(value_debug)
 
     # header setting
     request_headers = {
-        #"Accept-Language": "en-US,en;q=0.5",
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.101 Safari/537.36",
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept-Language": "en-US,en;q=0.5",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        # "Accept-Encoding": "gzip, deflate, sdch, br",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Connection": "keep-Alive",
+        "Host": "",
         "Referer": url,
-        "Host": "log.51cto.com",
-        "Connection": "keep-Alive"
+        "Upgrade-Insecure-Requests": 1,
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.101 Safari/537.36",
+        "Content-Type": "application/x-www-form-urlencoded"
+        # "Content-Type": "text/html"
     }
 
     request_POST = urllib2.Request(url, data_credential, request_headers)
-    request_GET = urllib2.Request(url)
-    response = urllib2.urlopen(request_GET)
 
+    try:
+        response_POST = urllib2.urlopen(request_POST)
+    except urllib2.HTTPError as e:
+        if e.code == 404:
+            print "Error 404, Page not found"
+            print "cause : " + e.reason
+    else:
+        print "===================================Login Success=======================================\n"
+        print response_POST.read()
+
+
+def ReqGET(url):
+    request_GET = urllib2.Request(url)
+    response_GET = urllib2.urlopen(url)
     print "-----------------------"
-    print dir(request_GET)
-    print "-----------------------"
-    print dir(response)
-    print "-----------------------"
-    print dir(response.headers)
-    print "-----------------------"
-    print response.headers
-    # print response.read()
-    # print response_POST.data
+    print response_GET.read()
 
 
 def Sessionlogin(url):
+    payload = {
+        "login": "",
+        "foolAutofillFromBrowser": "",
+        "password": "?",
+        "sub_auth": "Login"
+    }
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        # "Accept-Encoding": "gzip, deflate, sdch, br",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Connection": "keep-Alive",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Host": "",
+        "Origin": "",
+        "Referer": url,
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.101 Safari/537.36"
+        # "Content-Type": "text/html"
+    }
     s = requests.Session()
-    print s.get(url).cookies['csrf-token']
+    response_S = s.get(url, params=payload, headers=headers,
+                       verify=False)  # params=payload
+    # s.headers.update
+    print response_S.text
 
-    #response_S = s.get(url)
-    #csrf_token = response_S.cookies['csrf']
-    # print dir(response_S), response_S.cookies
+    # r = requests.post(url, data=payload)
 
 # ---------------------------MAIN PROGRAMME--------------------------------
-# url of the site to log in
-url = "http://home.51cto.com/index/?reback=http%3A%2F%2Fedu.51cto.com%2Fcenter%2Fuser%2Findex%2Flogin-success%3Fsign%3D6f2dzemoA77jungBNlad73PnT0FSKJT8Kfl74X15sJPuIX5HN12pPHDc3A51vAdkxq403ZKTdf774gX1dNpLiTZH5r8ysjaER5qTZ2SuHvVm6vvcLRyL2I_VZxlRi_ZUo4HB%26client%3Dweb"
+if __name__ == '__main__':
+    Login(url, username='498651225@qq.com', password='wodingni1937')
 
-Sessionlogin(url)
+    home_url = 'http://www.51cto.com/'
+    resp = session.get(home_url, headers=headers, allow_redirects=False)
+    print resp.text.encode('utf-8')
