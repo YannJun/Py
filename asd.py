@@ -39,9 +39,16 @@ session = requests.Session()
 session.cookies = cookielib.LWPCookieJar(filename)
 # 若本地有cookie则不用再post数据了
 try:
-    session.cookies.load(filename=filename, ignore_discard=True)
+    print 'Loading cookies...'
+    session.cookies.load(
+        filename=filename, ignore_discard=True, ignore_expires=True)
+    print 'Cookie loaded with success'
+    rep = session.get('http://www.51cto.com/',)
+    print rep.text.encode('utf-8')
+    # if rep.cookies.get_dict():
+    #     self.cookies.update(r.cookies)
 except:
-    print('Cookie未加载！')
+    print 'Cookie未加载！'
 
 
 def Getcsrf():
@@ -166,9 +173,9 @@ def Sessionlogin(url):
     # r = requests.post(url, data=payload)
 
 # ---------------------------MAIN PROGRAMME--------------------------------
-if __name__ == '__main__':
-    Login(url, username='', password='')
-
-    home_url = 'http://www.51cto.com/'
-    resp = session.get(home_url, headers=headers, allow_redirects=False)
-    print resp.text.encode('utf-8')
+# if __name__ == '__main__':
+#     Login(url, username='498651225@qq.com', password='wodingni1937')
+#
+#     home_url = 'http://www.51cto.com/'
+#     resp = session.get(home_url, headers=headers, allow_redirects=False)
+#     print unicode(resp.text, "utf-8")
