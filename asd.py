@@ -43,12 +43,15 @@ try:
     session.cookies.load(
         filename=filename, ignore_discard=True, ignore_expires=True)
     print 'Cookie loaded with success'
-    rep = session.get('http://www.51cto.com/',)
-    print rep.text.encode('utf-8')
-    # if rep.cookies.get_dict():
-    #     self.cookies.update(r.cookies)
+    # rep = session.get(
+    #     'http://home.51cto.com/index?reback=http://www.51cto.com/',)
+    # rep.encoding = 'utf-8'
+    # print rep.encoding
+    # print rep.text.encode('utf-8')
+    # # if rep.cookies.get_dict():
+    # #     self.cookies.update(r.cookies)
 except:
-    print 'Cookie未加载！'
+    print 'Cookie未加载！或 Response出错'
 
 
 def Getcsrf():
@@ -57,10 +60,11 @@ def Getcsrf():
     """
     response = session.get(
         'http://home.51cto.com/index?reback=http://www.51cto.com/', headers=headers)
-    html = response.text
+    response.encoding = 'utf-8'
+    html = response.text.encode('utf-8')
+    print html
     get_csrf_pattern = re.compile(
-        r'<meta name="csrf-token" content="(.*?)"')
-    # <meta name="csrf-token" content="Lk1YZkJVUzdPJCgcGCALbV4APzQkJh1uayMeIjMUBkZiJhEFKi8mUg==">
+        r'<input type="hidden" value="(.*?)" name="_csrf">')
     _csrf = re.findall(get_csrf_pattern, html)[0]
     return _csrf
 
@@ -173,9 +177,10 @@ def Sessionlogin(url):
     # r = requests.post(url, data=payload)
 
 # ---------------------------MAIN PROGRAMME--------------------------------
-# if __name__ == '__main__':
-#     Login(url, username='498651225@qq.com', password='wodingni1937')
-#
-#     home_url = 'http://www.51cto.com/'
-#     resp = session.get(home_url, headers=headers, allow_redirects=False)
-#     print unicode(resp.text, "utf-8")
+if __name__ == '__main__':
+    Login(url, username='', password='')
+
+    home_url = 'http://home.51cto.com/index?reback=http://www.51cto.com/'
+    resp = session.get(home_url, headers=headers, allow_redirects=True)
+    resp.encoding = 'utf-8'
+    print resp.text.encode('utf-8')
