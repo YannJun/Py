@@ -5,6 +5,7 @@ https://repo1.maven.org/maven2/com/github/klieber/phantomjs/1.9.8/
 
 http://download.csdn.net/tag/phantomjs
 
+https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/
 
 selenium.common.exceptions.WebDriverException: Message: 'phantomjs.exe' executable needs to be in PATH. 
 
