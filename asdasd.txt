@@ -2,13 +2,11 @@ http://wklken.me/posts/2013/08/31/python-extra-coding-intro.html
 
 
 https://repo1.maven.org/maven2/com/github/klieber/phantomjs/1.9.8/
-
 http://download.csdn.net/tag/phantomjs
-
 https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/
+http://docs.seleniumhq.org/docs/03_webdriver.jsp
 
 selenium.common.exceptions.WebDriverException: Message: 'phantomjs.exe' executable needs to be in PATH. 
-
 selenium.common.exceptions.WebDriverException: Message: 'phantomjs-1.9.8-windows' executable may have wrong permissions. 
 
 
