@@ -7,3 +7,5 @@ http://download.csdn.net/tag/phantomjs
 
 
 selenium.common.exceptions.WebDriverException: Message: 'phantomjs.exe' executable needs to be in PATH. 
+
+selenium.common.exceptions.WebDriverException: Message: 'phantomjs-1.9.8-windows' executable may have wrong permissions. 
